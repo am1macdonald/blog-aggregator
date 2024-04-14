@@ -1,13 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/am1macdonald/blog-aggregator/internal/database"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -15,6 +17,7 @@ var (
 )
 
 type apiConfig struct {
+	DB *database.Queries
 }
 
 func jsonResponse(w http.ResponseWriter, status int, payload interface{}) {
@@ -27,8 +30,10 @@ func jsonResponse(w http.ResponseWriter, status int, payload interface{}) {
 	w.WriteHeader(status)
 	w.Write(val)
 }
-func errorResponse(w http.ResponseWriter, code int, msg string) {
-	jsonResponse(w, code, errors.New(msg))
+
+func errorResponse(w http.ResponseWriter, code int, msg interface{}) {
+	log.Println(msg)
+	jsonResponse(w, code, msg)
 }
 
 func middlewareCors(next http.Handler) http.Handler {
@@ -53,8 +58,19 @@ func init() {
 }
 
 func main() {
+	db, err := sql.Open("postgres", os.Getenv("DB_CONN"))
+	if err != nil {
+		log.Panicf("Fatal: %v", err)
+	}
+	cfg := apiConfig{
+		DB: database.New(db),
+	}
+
 	mux := *http.NewServeMux()
-	mux.HandleFunc("GET /v1/readiness", HandleGetReadiness)
+
+	// testing
+	mux.HandleFunc("GET /v1/readiness", cfg.HandleGetReadiness)
+	mux.HandleFunc("GET /v1/error", cfg.HandleGetError)
 
 	corsMux := middlewareCors(&mux)
 	server := http.Server{
