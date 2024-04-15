@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +19,16 @@ var (
 
 type apiConfig struct {
 	DB *database.Queries
+}
+
+func DecodeRequest[T any](r *http.Request, dest *T) error {
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&dest)
+	if err != nil {
+		log.Printf("Error decoding request: %s", err)
+		return err
+	}
+	return nil
 }
 
 func jsonResponse(w http.ResponseWriter, status int, payload interface{}) {
@@ -69,13 +80,18 @@ func main() {
 	mux := *http.NewServeMux()
 
 	// testing
-	mux.HandleFunc("GET /v1/readiness", cfg.HandleGetReadiness)
-	mux.HandleFunc("GET /v1/error", cfg.HandleGetError)
+	mux.HandleFunc("GET /v1/readiness", cfg.handleGetReadiness)
+	mux.HandleFunc("GET /v1/error", cfg.handleGetError)
+
+	// users
+	mux.HandleFunc("POST /v1/users", cfg.handleCreateUser)
+	mux.HandleFunc("GET /v1/users", cfg.handleGetUserByApiKey)
 
 	corsMux := middlewareCors(&mux)
 	server := http.Server{
 		Addr:    ":" + port,
 		Handler: corsMux,
 	}
+	fmt.Printf("Server listening at http://localhost:%v", port)
 	log.Fatal(server.ListenAndServe())
 }
