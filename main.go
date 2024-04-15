@@ -17,6 +17,8 @@ var (
 	port string
 )
 
+type authedHandler func(http.ResponseWriter, *http.Request, database.User)
+
 type apiConfig struct {
 	DB *database.Queries
 }
@@ -86,6 +88,9 @@ func main() {
 	// users
 	mux.HandleFunc("POST /v1/users", cfg.handleCreateUser)
 	mux.HandleFunc("GET /v1/users", cfg.handleGetUserByApiKey)
+
+	// posts
+	mux.HandleFunc("POST /v1/posts", cfg.middlewareAuth(cfg.handleCreateFeed))
 
 	corsMux := middlewareCors(&mux)
 	server := http.Server{

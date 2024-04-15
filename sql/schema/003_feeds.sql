@@ -5,7 +5,7 @@ CREATE TABLE feeds (
   updated_at TIMESTAMP NOT NULL DEFAULT Now(),
   name TEXT NOT NULL,
   url TEXT NOT NULL,
-  user_id UUID REFERENCES users (id)
+  user_id UUID REFERENCES users (id) NOT NULL
 );
 
 -- +goose Down
