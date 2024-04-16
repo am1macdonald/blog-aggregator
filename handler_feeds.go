@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -20,12 +22,17 @@ type feedResponse struct {
 
 func (cfg *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, u database.User) {
 	body := struct {
-		Name string `json:"name"`
-		Url  string `json:"url"`
+		Name string `json:"name,omitempty"`
+		Url  string `json:"url,omitempty"`
 	}{}
 	err := DecodeRequest(r, &body)
 	if err != nil {
 		errorResponse(w, 500, err)
+		return
+	}
+	fmt.Println(body)
+	if body.Name == "" || body.Url == "" {
+		errorResponse(w, 404, errors.New("invalid request"))
 		return
 	}
 	feed, err := cfg.DB.CreateFeed(context.Background(), database.CreateFeedParams{
@@ -66,4 +73,28 @@ func (cfg *apiConfig) handleGetFeeds(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, 200, struct {
 		Feeds []feedResponse `json:"feeds"`
 	}{Feeds: feeds})
+}
+
+func (cfg *apiConfig) handleFollowFeed(w http.ResponseWriter, r *http.Request, u database.User) {
+	body := struct {
+		FeedID uuid.UUID `json:"feed_id,omitempty"`
+	}{}
+	err := DecodeRequest(r, &body)
+	if err != nil {
+		errorResponse(w, 500, err)
+		return
+	}
+	if body.FeedID == uuid.Nil {
+		errorResponse(w, 404, errors.New("invalid request"))
+		return
+	}
+	f, err := cfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		UserID: u.ID,
+		FeedID: body.FeedID,
+	})
+	if err != nil {
+		errorResponse(w, 500, err)
+		return
+	}
+	jsonResponse(w, 200, f)
 }
