@@ -92,6 +92,8 @@ func main() {
 	// feeds
 	mux.HandleFunc("POST /v1/feeds", cfg.middlewareAuth(cfg.handleCreateFeed))
 	mux.HandleFunc("GET /v1/feeds", cfg.handleGetFeeds)
+
+	// feed_follows
 	mux.HandleFunc("POST /v1/feed_follows", cfg.middlewareAuth(cfg.handleFollowFeed))
 
 	corsMux := middlewareCors(&mux)
