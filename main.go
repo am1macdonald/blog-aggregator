@@ -17,8 +17,6 @@ var (
 	port string
 )
 
-type authedHandler func(http.ResponseWriter, *http.Request, database.User)
-
 type apiConfig struct {
 	DB *database.Queries
 }
@@ -95,6 +93,7 @@ func main() {
 
 	// feed_follows
 	mux.HandleFunc("POST /v1/feed_follows", cfg.middlewareAuth(cfg.handleFollowFeed))
+	mux.HandleFunc("DELETE /v1/feed_follows/{feed_follow_id}", cfg.middlewareAuth(cfg.handleDeleteFeedFollow))
 
 	corsMux := middlewareCors(&mux)
 	server := http.Server{

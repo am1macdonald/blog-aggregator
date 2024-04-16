@@ -5,7 +5,11 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+
+	"github.com/am1macdonald/blog-aggregator/internal/database"
 )
+
+type authedHandler func(http.ResponseWriter, *http.Request, *database.User)
 
 func (cfg *apiConfig) middlewareAuth(next authedHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +23,6 @@ func (cfg *apiConfig) middlewareAuth(next authedHandler) http.HandlerFunc {
 			errorResponse(w, 500, err)
 			return
 		}
-		next(w, r, user)
+		next(w, r, &user)
 	}
 }

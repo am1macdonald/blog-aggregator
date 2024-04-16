@@ -20,7 +20,7 @@ type feedResponse struct {
 	UserID    uuid.UUID `json:"user_id"`
 }
 
-func (cfg *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, u database.User) {
+func (cfg *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, u *database.User) {
 	body := struct {
 		Name string `json:"name,omitempty"`
 		Url  string `json:"url,omitempty"`

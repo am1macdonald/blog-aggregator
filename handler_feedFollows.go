@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handleFollowFeed(w http.ResponseWriter, r *http.Request, u database.User) {
+func (cfg *apiConfig) handleFollowFeed(w http.ResponseWriter, r *http.Request, u *database.User) {
 	body := struct {
 		FeedID uuid.UUID `json:"feed_id,omitempty"`
 	}{}
@@ -30,4 +30,23 @@ func (cfg *apiConfig) handleFollowFeed(w http.ResponseWriter, r *http.Request, u
 		return
 	}
 	jsonResponse(w, 200, f)
+}
+
+func (cfg *apiConfig) handleDeleteFeedFollow(w http.ResponseWriter, r *http.Request, u *database.User) {
+	id := r.PathValue("feed_follow_id")
+	if id == "" {
+		errorResponse(w, 404, errors.New("missing path parameter"))
+		return
+	}
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		errorResponse(w, 500, err)
+		return
+	}
+	err = cfg.DB.DeleteFeedFollow(r.Context(), uuid)
+	if err != nil {
+		errorResponse(w, 500, err)
+		return
+	}
+	jsonResponse(w, 200, struct{}{})
 }
