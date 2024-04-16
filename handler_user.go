@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/am1macdonald/blog-aggregator/internal/database"
 	"github.com/google/uuid"
@@ -22,10 +21,8 @@ func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user, err := cfg.DB.CreateUser(context.Background(), database.CreateUserParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name:      body.Name,
+		ID:   uuid.New(),
+		Name: body.Name,
 	})
 	log.Println(user)
 	if err != nil {
