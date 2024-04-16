@@ -18,9 +18,9 @@ RETURNING id, created_at, updated_at, name, url, user_id
 `
 
 type CreateFeedParams struct {
-	Name   string
-	Url    string
-	UserID uuid.UUID
+	Name   string    `json:"name"`
+	Url    string    `json:"url"`
+	UserID uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, error) {
@@ -33,6 +33,30 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 		&i.Name,
 		&i.Url,
 		&i.UserID,
+	)
+	return i, err
+}
+
+const createFeedFollow = `-- name: CreateFeedFollow :one
+INSERT INTO feed_follows (user_id, feed_id)
+VALUES ($1, $2)
+RETURNING id, created_at, updated_at, user_id, feed_id
+`
+
+type CreateFeedFollowParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	FeedID uuid.UUID `json:"feed_id"`
+}
+
+func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowParams) (FeedFollow, error) {
+	row := q.db.QueryRowContext(ctx, createFeedFollow, arg.UserID, arg.FeedID)
+	var i FeedFollow
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.FeedID,
 	)
 	return i, err
 }

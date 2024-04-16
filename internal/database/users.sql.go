@@ -18,8 +18,8 @@ RETURNING id, created_at, updated_at, name, api_key
 `
 
 type CreateUserParams struct {
-	ID   uuid.UUID
-	Name string
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
