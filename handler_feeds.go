@@ -9,6 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
+type feedResponse struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	Url       string    `json:"url"`
+	UserID    uuid.UUID `json:"user_id"`
+}
+
 func (cfg *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, u database.User) {
 	body := struct {
 		Name string `json:"name"`
@@ -28,18 +37,33 @@ func (cfg *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, u
 		errorResponse(w, 500, err)
 		return
 	}
-	jsonResponse(w, 200, struct {
-		ID        uuid.UUID `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		Name      string    `json:"name"`
-		Url       string    `json:"url"`
-		UserID    uuid.UUID `json:"user_id"`
-	}{
+	jsonResponse(w, 200, feedResponse{
 		ID:        feed.ID,
 		CreatedAt: feed.CreatedAt,
 		UpdatedAt: feed.UpdatedAt,
 		Name:      feed.Name,
 		Url:       feed.Url,
 		UserID:    feed.UserID})
+}
+
+func (cfg *apiConfig) handleGetFeeds(w http.ResponseWriter, r *http.Request) {
+	f, err := cfg.DB.GetAllFeeds(r.Context())
+	if err != nil {
+		errorResponse(w, 500, err)
+		return
+	}
+	feeds := []feedResponse{}
+	for _, feed := range f {
+		feeds = append(feeds, feedResponse{
+			ID:        feed.ID,
+			CreatedAt: feed.CreatedAt,
+			UpdatedAt: feed.UpdatedAt,
+			Name:      feed.Name,
+			Url:       feed.Url,
+			UserID:    feed.UserID,
+		})
+	}
+	jsonResponse(w, 200, struct {
+		Feeds []feedResponse `json:"feeds"`
+	}{Feeds: feeds})
 }

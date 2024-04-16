@@ -89,8 +89,9 @@ func main() {
 	mux.HandleFunc("POST /v1/users", cfg.handleCreateUser)
 	mux.HandleFunc("GET /v1/users", cfg.handleGetUserByApiKey)
 
-	// posts
-	mux.HandleFunc("POST /v1/posts", cfg.middlewareAuth(cfg.handleCreateFeed))
+	// feeds
+	mux.HandleFunc("POST /v1/feeds", cfg.middlewareAuth(cfg.handleCreateFeed))
+	mux.HandleFunc("GET /v1/feeds", cfg.handleGetFeeds)
 
 	corsMux := middlewareCors(&mux)
 	server := http.Server{
