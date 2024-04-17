@@ -44,13 +44,22 @@ func (cfg *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, u
 		errorResponse(w, 500, err)
 		return
 	}
-	jsonResponse(w, 200, feedResponse{
-		ID:        feed.ID,
-		CreatedAt: feed.CreatedAt,
-		UpdatedAt: feed.UpdatedAt,
-		Name:      feed.Name,
-		Url:       feed.Url,
-		UserID:    feed.UserID})
+	ff, err := cfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		UserID: u.ID,
+		FeedID: feed.ID,
+	})
+	if err != nil {
+		errorResponse(w, 500, err)
+		return
+	}
+	jsonResponse(w, 200, struct {
+		FeedResponse database.Feed       `json:"feed"`
+		FeedFollow   database.FeedFollow `json:"feed_follow"`
+	}{
+		FeedResponse: feed,
+		FeedFollow:   ff,
+	},
+	)
 }
 
 func (cfg *apiConfig) handleGetFeeds(w http.ResponseWriter, r *http.Request) {

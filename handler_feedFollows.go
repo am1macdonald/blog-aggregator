@@ -50,3 +50,12 @@ func (cfg *apiConfig) handleDeleteFeedFollow(w http.ResponseWriter, r *http.Requ
 	}
 	jsonResponse(w, 200, struct{}{})
 }
+
+func (cfg *apiConfig) handleGetAllFeedFollows(w http.ResponseWriter, r *http.Request, u *database.User) {
+	follows, err := cfg.DB.GetAllFeedFollows(r.Context(), u.ID)
+	if err != nil {
+		errorResponse(w, 500, err)
+		return
+	}
+	jsonResponse(w, 200, follows)
+}
