@@ -3,10 +3,35 @@ package main
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/am1macdonald/blog-aggregator/internal/database"
 	"github.com/google/uuid"
 )
+
+type FeedFollow struct {
+	ID            uuid.UUID `json:"id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	UserID        uuid.UUID `json:"user_id"`
+	FeedID        uuid.UUID `json:"feed_id"`
+	LastFetchedAt time.Time `json:"last_fetched_at"`
+}
+
+func databaseFeedFollowToFeedFollow(dff *database.FeedFollow) FeedFollow {
+	time := time.Time{}
+	if dff.LastFetchedAt.Valid {
+		time = dff.LastFetchedAt.Time
+	}
+	return FeedFollow{
+		ID:            dff.ID,
+		CreatedAt:     dff.CreatedAt,
+		UpdatedAt:     dff.UpdatedAt,
+		UserID:        dff.UserID,
+		FeedID:        dff.FeedID,
+		LastFetchedAt: time,
+	}
+}
 
 func (cfg *apiConfig) handleFollowFeed(w http.ResponseWriter, r *http.Request, u *database.User) {
 	body := struct {
@@ -57,5 +82,9 @@ func (cfg *apiConfig) handleGetAllFeedFollows(w http.ResponseWriter, r *http.Req
 		errorResponse(w, 500, err)
 		return
 	}
-	jsonResponse(w, 200, follows)
+	feedFollows := make([]FeedFollow, len(follows))
+	for i, ff := range follows {
+		feedFollows[i] = databaseFeedFollowToFeedFollow(&ff)
+	}
+	jsonResponse(w, 200, feedFollows)
 }

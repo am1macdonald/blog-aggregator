@@ -11,13 +11,24 @@ import (
 	"github.com/google/uuid"
 )
 
-type feedResponse struct {
+type Feed struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Name      string    `json:"name"`
 	Url       string    `json:"url"`
 	UserID    uuid.UUID `json:"user_id"`
+}
+
+func databaseFeedToFeed(feed database.Feed) Feed {
+	return Feed{
+		ID:        feed.ID,
+		CreatedAt: feed.CreatedAt,
+		UpdatedAt: feed.UpdatedAt,
+		Name:      feed.Name,
+		Url:       feed.Url,
+		UserID:    feed.UserID,
+	}
 }
 
 func (cfg *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, u *database.User) {
@@ -68,18 +79,11 @@ func (cfg *apiConfig) handleGetFeeds(w http.ResponseWriter, r *http.Request) {
 		errorResponse(w, 500, err)
 		return
 	}
-	feeds := []feedResponse{}
+	feeds := []Feed{}
 	for _, feed := range f {
-		feeds = append(feeds, feedResponse{
-			ID:        feed.ID,
-			CreatedAt: feed.CreatedAt,
-			UpdatedAt: feed.UpdatedAt,
-			Name:      feed.Name,
-			Url:       feed.Url,
-			UserID:    feed.UserID,
-		})
+		feeds = append(feeds, databaseFeedToFeed(feed))
 	}
 	jsonResponse(w, 200, struct {
-		Feeds []feedResponse `json:"feeds"`
+		Feeds []Feed `json:"feeds"`
 	}{Feeds: feeds})
 }
