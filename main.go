@@ -7,8 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/am1macdonald/blog-aggregator/internal/database"
+	"github.com/am1macdonald/blog-aggregator/internal/worker"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -73,9 +75,17 @@ func main() {
 	if err != nil {
 		log.Panicf("Fatal: %v", err)
 	}
+	dbConn := database.New(db)
 	cfg := apiConfig{
-		DB: database.New(db),
+		DB: dbConn,
 	}
+
+	worker := worker.Worker{
+		Limit:    10,
+		Interval: time.Duration(time.Second * 10),
+		DB:       *dbConn,
+	}
+	log.Fatal(worker.FetchFeeds())
 
 	mux := *http.NewServeMux()
 
