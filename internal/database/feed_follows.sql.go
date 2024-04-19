@@ -14,7 +14,7 @@ import (
 const createFeedFollow = `-- name: CreateFeedFollow :one
 INSERT INTO feed_follows (user_id, feed_id)
 VALUES ($1, $2)
-RETURNING id, created_at, updated_at, user_id, feed_id, last_fetched_at
+RETURNING id, created_at, updated_at, user_id, feed_id
 `
 
 type CreateFeedFollowParams struct {
@@ -31,7 +31,6 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.FeedID,
-		&i.LastFetchedAt,
 	)
 	return i, err
 }
@@ -47,7 +46,7 @@ func (q *Queries) DeleteFeedFollow(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllFeedFollows = `-- name: GetAllFeedFollows :many
-SELECT id, created_at, updated_at, user_id, feed_id, last_fetched_at FROM feed_follows
+SELECT id, created_at, updated_at, user_id, feed_id FROM feed_follows
 WHERE user_id = $1
 `
 
@@ -66,7 +65,6 @@ func (q *Queries) GetAllFeedFollows(ctx context.Context, userID uuid.UUID) ([]Fe
 			&i.UpdatedAt,
 			&i.UserID,
 			&i.FeedID,
-			&i.LastFetchedAt,
 		); err != nil {
 			return nil, err
 		}
