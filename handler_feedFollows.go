@@ -10,26 +10,20 @@ import (
 )
 
 type FeedFollow struct {
-	ID            uuid.UUID `json:"id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	UserID        uuid.UUID `json:"user_id"`
-	FeedID        uuid.UUID `json:"feed_id"`
-	LastFetchedAt time.Time `json:"last_fetched_at"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	UserID    uuid.UUID `json:"user_id"`
+	FeedID    uuid.UUID `json:"feed_id"`
 }
 
 func databaseFeedFollowToFeedFollow(dff *database.FeedFollow) FeedFollow {
-	time := time.Time{}
-	if dff.LastFetchedAt.Valid {
-		time = dff.LastFetchedAt.Time
-	}
 	return FeedFollow{
-		ID:            dff.ID,
-		CreatedAt:     dff.CreatedAt,
-		UpdatedAt:     dff.UpdatedAt,
-		UserID:        dff.UserID,
-		FeedID:        dff.FeedID,
-		LastFetchedAt: time,
+		ID:        dff.ID,
+		CreatedAt: dff.CreatedAt,
+		UpdatedAt: dff.UpdatedAt,
+		UserID:    dff.UserID,
+		FeedID:    dff.FeedID,
 	}
 }
 
