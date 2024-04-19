@@ -1,7 +1,7 @@
 -- +goose Up
-ALTER TABLE feed_follows
+ALTER TABLE feeds
 ADD last_fetched_at TIMESTAMP null; 
 
 -- +goose Down
-ALTER TABLE feed_follows
+ALTER TABLE feeds
 DROP COLUMN last_fetched_at; 
