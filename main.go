@@ -106,6 +106,9 @@ func main() {
 	mux.HandleFunc("POST /v1/feed_follows", cfg.middlewareAuth(cfg.handleFollowFeed))
 	mux.HandleFunc("DELETE /v1/feed_follows/{feed_follow_id}", cfg.middlewareAuth(cfg.handleDeleteFeedFollow))
 
+	// posts
+	mux.HandleFunc("GET /v1/posts", cfg.middlewareAuth(cfg.handleGetPostsByUser))
+
 	corsMux := middlewareCors(&mux)
 	server := http.Server{
 		Addr:    ":" + port,
