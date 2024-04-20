@@ -12,41 +12,29 @@ import (
 	"github.com/google/uuid"
 )
 
-const createPost = `-- name: CreatePost :one
+const createPost = `-- name: CreatePost :exec
 INSERT INTO posts 
 (title, url, description, published_at, feed_id)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, created_at, updated_at, title, url, description, published_at, feed_id
 `
 
 type CreatePostParams struct {
-	Title       string        `json:"title"`
-	Url         string        `json:"url"`
-	Description string        `json:"description"`
-	PublishedAt time.Time     `json:"published_at"`
-	FeedID      uuid.NullUUID `json:"feed_id"`
+	Title       string    `json:"title"`
+	Url         string    `json:"url"`
+	Description string    `json:"description"`
+	PublishedAt time.Time `json:"published_at"`
+	FeedID      uuid.UUID `json:"feed_id"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
-	row := q.db.QueryRowContext(ctx, createPost,
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
+	_, err := q.db.ExecContext(ctx, createPost,
 		arg.Title,
 		arg.Url,
 		arg.Description,
 		arg.PublishedAt,
 		arg.FeedID,
 	)
-	var i Post
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Title,
-		&i.Url,
-		&i.Description,
-		&i.PublishedAt,
-		&i.FeedID,
-	)
-	return i, err
+	return err
 }
 
 const getPostsByUser = `-- name: GetPostsByUser :many

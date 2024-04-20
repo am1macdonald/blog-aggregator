@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/am1macdonald/blog-aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 type Worker struct {
@@ -44,16 +45,30 @@ func (w *Worker) work(wg *sync.WaitGroup, df *database.Feed) error {
 		return err
 	}
 	log.Printf("Worker: got feed %v", rss.Channel.Title)
-	err = w.processFeed(&rss)
+	err = w.processFeed(&rss, df.ID)
 	if err != nil {
 		return err
 	}
 	return w.DB.MarkFeedFetched(context.Background(), df.ID)
 }
 
-func (w *Worker) processFeed(feed *Rss) error {
+func (w *Worker) processFeed(feed *Rss, feed_id uuid.UUID) error {
 	for _, val := range feed.Channel.Item {
-		fmt.Println(val.Title)
+		pubDate, err := time.Parse(time.RFC1123Z, val.PubDate)
+		if err != nil {
+			log.Printf("%v: has invalid date", val.Title)
+			continue
+		}
+		err = w.DB.CreatePost(context.Background(), database.CreatePostParams{
+			Title:       val.Title,
+			Url:         val.Link,
+			Description: val.Description,
+			PublishedAt: pubDate,
+			FeedID:      feed_id,
+		})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }

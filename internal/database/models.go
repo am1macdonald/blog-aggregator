@@ -30,14 +30,14 @@ type FeedFollow struct {
 }
 
 type Post struct {
-	ID          uuid.UUID     `json:"id"`
-	CreatedAt   time.Time     `json:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
-	Title       string        `json:"title"`
-	Url         string        `json:"url"`
-	Description string        `json:"description"`
-	PublishedAt time.Time     `json:"published_at"`
-	FeedID      uuid.NullUUID `json:"feed_id"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Title       string    `json:"title"`
+	Url         string    `json:"url"`
+	Description string    `json:"description"`
+	PublishedAt time.Time `json:"published_at"`
+	FeedID      uuid.UUID `json:"feed_id"`
 }
 
 type User struct {
