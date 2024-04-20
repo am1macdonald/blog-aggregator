@@ -85,7 +85,7 @@ func main() {
 		Interval: time.Duration(time.Second * 10),
 		DB:       *dbConn,
 	}
-	log.Fatal(worker.FetchFeeds())
+	go worker.FetchFeeds()
 
 	mux := *http.NewServeMux()
 
